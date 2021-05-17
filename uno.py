@@ -12,9 +12,10 @@ class Card:
         self.name = self.color + " " + self.num
 
 class Player:
-    def __init__(self, num, cards):
+    def __init__(self, num, cards, playstyle):
         self.num = num
         self.hand = cards
+        self.playstyle = playstyle
 
 def draw_card(deck, player_hand):
     player_hand.append(deck[0])
@@ -52,19 +53,24 @@ def build_deck():
     return deck
 
 #Build Players
-def build_players(deck, player_num):
+def build_players(deck, player_num, playstyles):
     players = []
     for player in range(player_num):
         player_hand = []
         for card_num in range(7):
             deck, player_hand = draw_card(deck, player_hand)
-        players.append(Player(player+1, player_hand))
+        if player in playstyles:
+            players.append(Player(player+1, player_hand, playstyles[player])) 
+        else:
+            players.append(Player(player+1, player_hand, 0))
+
     return players
 
-def run():
+def run(playstyles):
     current_player = 1
     deck = build_deck()
-    players = build_players(deck, player_num)
+    players = build_players(deck, player_num, playstyles)
+    pile = []
     deck, pile = draw_card(deck, pile)
 
     #play game
@@ -83,6 +89,6 @@ def run():
     
 
 
-run()
+run({2:1})
 
 print("uno.py finished")
