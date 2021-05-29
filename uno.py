@@ -3,6 +3,8 @@ print("uno.py started")
 from random import shuffle
 #Settings
 player_num = 4
+starting_card_num = 7
+draw_1 = True
 
 #Utilities
 class Card:
@@ -17,10 +19,28 @@ class Player:
         self.hand = cards
         self.playstyle = playstyle
 
-    def play_card(self, playstyle, pile):
-        if playstyle == 0:
-            for card in self.cards:
-                if card.color == pile[0].color
+    def play_card(self, deck, pile):
+        if self.playstyle == 0:
+            for card in self.hand:
+                if card.color == pile[0].color or card.num == pile[0].num:
+                    pile.append(card)
+                    self.hand.remove(card)
+                    print(f"Playing Card: {card.name}")
+                    return deck, pile
+            if draw_1:
+                draw_card(deck, self.hand)
+                if self.hand[-1].color == pile[0].color or self.hand[-1].num == pile[0].num:
+                    pile.append(card)
+                    self.append(card)
+                    print(f"Playing Card: {card.name}")
+                    return deck, pile
+            else:
+                while self.hand[-1].color != pile[0].color and self.hand[-1].num != pile[0].num:
+                    draw_card(deck, self.hand)
+                pile.append(card)
+                self.append(card)
+                print(f"Playing Card: {card.name}")
+                return deck, pile
 
 def draw_card(deck, player_hand):
     player_hand.append(deck[0])
@@ -62,7 +82,7 @@ def build_players(deck, player_num, playstyles):
     players = []
     for player in range(player_num):
         player_hand = []
-        for card_num in range(7):
+        for card_num in range(starting_card_num):
             deck, player_hand = draw_card(deck, player_hand)
         if player in playstyles:
             players.append(Player(player+1, player_hand, playstyles[player])) 
@@ -80,8 +100,14 @@ def run(playstyles):
 
     #play game
     #while(1):
-
-    print_hand(players[2])
+    print(f"First card on pile: {pile[0].name}")
+    print(f"First player's hand:")
+    for card in players[0].hand:
+        print(card.name)
+    deck, pile = players[0].play_card(deck, pile)
+    print(f"First player's hand:")
+    for card in players[0].hand:
+        print(card.name)
 
     if not players[current_player-1].hand:
         return print(f"{current_player} wins!")
