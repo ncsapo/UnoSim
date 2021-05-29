@@ -76,8 +76,8 @@ def run(playstyles):
     #play game
     #while(1):
 
+    print_hand(players[2])
 
-    
     if not players[current_player-1].hand:
         return print(f"{current_player} wins!")
     
