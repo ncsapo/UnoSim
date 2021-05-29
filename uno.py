@@ -17,6 +17,11 @@ class Player:
         self.hand = cards
         self.playstyle = playstyle
 
+    def play_card(self, playstyle, pile):
+        if playstyle == 0:
+            for card in self.cards:
+                if card.color == pile[0].color
+
 def draw_card(deck, player_hand):
     player_hand.append(deck[0])
     deck.pop(0)
