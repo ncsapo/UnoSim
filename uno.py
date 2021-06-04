@@ -20,29 +20,44 @@ class Player:
         self.playstyle = playstyle
 
     def play_card(self, deck, pile):
+        #Organize hand so black cards are at the end and therefore other cards are prioritized
+        black_cards = []
+        for card_index in len(self.hand):
+            if self.hand[card_index].color == 'black':
+                card = self.hand[card_index]
+                self.hand.remove(card)
+                self.hand.append(card)
+                card_index -= 1
+
+        #Play cards
         if self.playstyle == 0:
             for card in self.hand:
                 if card.color == pile[0].color or card.num == pile[0].num:
                     pile.append(card)
                     self.hand.remove(card)
-                    print(f"Playing Card: {card.name}")
+                    print(f"Player {self.num} Playing Card: {card.name}")
                     return deck, pile
             if draw_1:
-                draw_card(deck, self.hand)
-                if self.hand[-1].color == pile[0].color or self.hand[-1].num == pile[0].num:
+                print(f"Player {self.num} drawing card")
+                deck, self.hand = draw_card(deck, self.hand)
+                card = self.hand[-1]
+                if card.color == pile[0].color or card.num == pile[0].num:
                     pile.append(card)
-                    self.append(card)
-                    print(f"Playing Card: {card.name}")
-                    return deck, pile
+                    self.hand.remove(card)
+                    print(f"Player {self.num} Playing Card: {card.name}")
+                return deck, pile
             else:
+                print(f"Player {self.num} drawing cards")
                 while self.hand[-1].color != pile[0].color and self.hand[-1].num != pile[0].num:
-                    draw_card(deck, self.hand)
+                    deck, self.hand = draw_card(deck, self.hand)
+                card = self.hand[-1]
                 pile.append(card)
-                self.append(card)
-                print(f"Playing Card: {card.name}")
+                self.hand.remove(card)
+                print(f"Player {self.num} Playing Card: {card.name}")
                 return deck, pile
 
 def draw_card(deck, player_hand):
+    print(f"Drawing card: {deck[0].name}")
     player_hand.append(deck[0])
     deck.pop(0)
     return deck, player_hand
@@ -102,12 +117,13 @@ def run(playstyles):
     #while(1):
     print(f"First card on pile: {pile[0].name}")
     print(f"First player's hand:")
+    hand = []
     for card in players[0].hand:
-        print(card.name)
+        hand.append(card.name)
+    print(hand)
     deck, pile = players[0].play_card(deck, pile)
-    print(f"First player's hand:")
-    for card in players[0].hand:
-        print(card.name)
+
+
 
     if not players[current_player-1].hand:
         return print(f"{current_player} wins!")
