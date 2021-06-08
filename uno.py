@@ -1,5 +1,6 @@
 print("uno.py started")
 
+import copy
 from random import shuffle
 #Settings
 player_num = 4
@@ -7,6 +8,19 @@ starting_card_num = 7
 draw_1 = True
 
 #Utilities
+def print_deck(deck):
+    print("Deck:")
+    for card in deck:
+        print(card.name)
+
+def print_hand(player):
+    print(f"Player {player.num}'s hand:")
+    hand = []
+    for card in player.hand:
+        hand.append(card.name)
+    print(hand)
+
+#Core Classes
 class Card:
     def __init__(self, color, num):
         self.color = color
@@ -18,17 +32,12 @@ class Player:
         self.num = num
         self.hand = cards
         self.playstyle = playstyle
-
+            
     def play_card(self, deck, pile):
         #Organize hand so black cards are at the end and therefore other cards are prioritized
-        black_cards = []
-        for card_index in len(self.hand):
-            if self.hand[card_index].color == 'black':
-                card = self.hand[card_index]
-                self.hand.remove(card)
-                self.hand.append(card)
-                card_index -= 1
-
+        #Put wilds with d4 following
+        self.hand.sort(key=lambda s:s.name.startswith('black wild'))
+        self.hand.sort(key=lambda s:s.name.startswith('black d4'))
         #Play cards
         if self.playstyle == 0:
             for card in self.hand:
@@ -56,21 +65,12 @@ class Player:
                 print(f"Player {self.num} Playing Card: {card.name}")
                 return deck, pile
 
+#Main Functions
 def draw_card(deck, player_hand):
     print(f"Drawing card: {deck[0].name}")
     player_hand.append(deck[0])
     deck.pop(0)
     return deck, player_hand
-
-def print_deck(deck):
-    print("Deck:")
-    for card in deck:
-        print(card.name)
-
-def print_hand(player):
-    print(f"Player {player.num}'s hand:")
-    for card in player.hand:
-        print(card.name)
 
 #Build Deck
 def build_deck():
@@ -110,20 +110,20 @@ def run(playstyles):
     current_player = 1
     deck = build_deck()
     players = build_players(deck, player_num, playstyles)
+    #For Testing
+    players[0].hand = [Card('black', 'wild'), Card('black', 'd4'), Card('red', 'skip'), Card('yellow', 'd2'), Card('green', 'rev'), Card('blue', '4')]
+    #End For Testing
     pile = []
     deck, pile = draw_card(deck, pile)
 
     #play game
     #while(1):
     print(f"First card on pile: {pile[0].name}")
-    print(f"First player's hand:")
-    hand = []
-    for card in players[0].hand:
-        hand.append(card.name)
-    print(hand)
+    print_hand(players[0])
+    
     deck, pile = players[0].play_card(deck, pile)
 
-
+    print_hand(players[0])
 
     if not players[current_player-1].hand:
         return print(f"{current_player} wins!")
