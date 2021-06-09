@@ -32,7 +32,16 @@ class Player:
         self.num = num
         self.hand = cards
         self.playstyle = playstyle
-            
+    
+    def get_most_color(self):
+        card_count_dict = {'red':0,'yellow':0,'green':0,'blue':0}
+        for card in self.hand:
+            if card.color in card_count_dict:
+                card_count_dict[card.color]+=1
+        max_value = max(card_count_dict.values())
+        max_keys = [color for color, value in card_count_dict.items() if value == max_value]
+        return list(max_keys)[0]
+
     def play_card(self, deck, pile):
         #Organize hand so black cards are at the end and therefore other cards are prioritized
         #Put wilds with d4 following
@@ -41,7 +50,7 @@ class Player:
         #Play cards
         if self.playstyle == 0:
             for card in self.hand:
-                if card.color == pile[0].color or card.num == pile[0].num:
+                if card.color == pile[0].color or card.num == pile[0].num or card.color == 'black':
                     pile.append(card)
                     self.hand.remove(card)
                     print(f"Player {self.num} Playing Card: {card.name}")
@@ -136,6 +145,6 @@ def run(playstyles):
     
 
 
-run({2:1})
+run({1:0})
 
 print("uno.py finished")
