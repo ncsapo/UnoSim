@@ -6,8 +6,16 @@ from random import shuffle
 player_num = 4
 starting_card_num = 7
 draw_1 = True
+reversed = False
 
 #Utilities
+def get_next_player(current_player):
+    if current_player == player_num:
+        current_player = 1
+    else:
+        current_player += 1
+    return current_player
+
 def print_deck(deck):
     print("Deck:")
     for card in deck:
@@ -50,7 +58,7 @@ class Player:
         #Play cards
         if self.playstyle == 0:
             for card in self.hand:
-                if card.color == pile[0].color or card.num == pile[0].num or card.color == 'black':
+                if card.color == pile[-1].color or card.num == pile[-1].num or card.color == 'black':
                     pile.append(card)
                     self.hand.remove(card)
                     print(f"Player {self.num} Playing Card: {card.name}")
@@ -59,14 +67,14 @@ class Player:
                 print(f"Player {self.num} drawing card")
                 deck, self.hand = draw_card(deck, self.hand)
                 card = self.hand[-1]
-                if card.color == pile[0].color or card.num == pile[0].num:
+                if card.color == pile[-1].color or card.num == pile[-1].num:
                     pile.append(card)
                     self.hand.remove(card)
                     print(f"Player {self.num} Playing Card: {card.name}")
                 return deck, pile
             else:
                 print(f"Player {self.num} drawing cards")
-                while self.hand[-1].color != pile[0].color and self.hand[-1].num != pile[0].num:
+                while self.hand[-1].color != pile[-1].color and self.hand[-1].num != pile[-1].num:
                     deck, self.hand = draw_card(deck, self.hand)
                 card = self.hand[-1]
                 pile.append(card)
@@ -126,22 +134,23 @@ def run(playstyles):
     deck, pile = draw_card(deck, pile)
 
     #play game
-    #while(1):
-    print(f"First card on pile: {pile[0].name}")
-    print_hand(players[0])
+    print(f"First card on pile: {pile[-1].name}")
+    #while(1)
+    for times in range(5):    
+        print_hand(players[current_player-1])
     
-    deck, pile = players[0].play_card(deck, pile)
+        deck, pile = players[current_player-1].play_card(deck, pile)
 
-    print_hand(players[0])
+        print_hand(players[current_player-1])
 
-    if not players[current_player-1].hand:
-        return print(f"{current_player} wins!")
+        print(f"Card on top of pile: {pile[-1].name}")
+
+        #Put in drawing conditions for when d2 and d4, choose color is played and rev stuff
+
+        if not players[current_player-1].hand:
+            return print(f"{current_player} wins!")
     
-    if current_player == player_num:
-        current_player = 1
-    else:
-        current_player += 1
-        
+        current_player = get_next_player(current_player)
     
 
 
