@@ -10,11 +10,17 @@ reversed = False
 
 #Utilities
 def get_next_player(current_player):
-    if current_player == player_num:
-        current_player = 1
+    if not reversed:
+        if current_player == player_num:
+            current_player = 1
+        else:
+            current_player += 1
+        return current_player
     else:
-        current_player += 1
-    return current_player
+        if current_player == 1:
+            current_player = player_num
+        else:
+            current_player -= 1
 
 def print_deck(deck):
     print("Deck:")
@@ -46,8 +52,9 @@ class Player:
         for card in self.hand:
             if card.color in card_count_dict:
                 card_count_dict[card.color]+=1
-        max_value = max(card_count_dict.values())
-        max_keys = [color for color, value in card_count_dict.items() if value == max_value]
+        max_value = max(list(card_count_dict.values()))
+        max_keys = []
+        max_keys.append([color for color, value in list(card_count_dict.items()) if value == max_value])
         return list(max_keys)[0]
 
     def play_card(self, deck, pile):
@@ -136,7 +143,7 @@ def run(playstyles):
     #play game
     print(f"First card on pile: {pile[-1].name}")
     #while(1)
-    for times in range(5):    
+    for times in range(15):    
         print_hand(players[current_player-1])
     
         deck, pile = players[current_player-1].play_card(deck, pile)
@@ -145,13 +152,44 @@ def run(playstyles):
 
         print(f"Card on top of pile: {pile[-1].name}")
 
-        #Put in drawing conditions for when d2 and d4, choose color is played and rev stuff
-
         if not players[current_player-1].hand:
             return print(f"{current_player} wins!")
     
+        #Put in drawing conditions for when d2 and d4, choose color played and rev and skip stuff
+        if pile[-1].num == 'rev':
+            if not reversed: 
+                reversed = True
+            else: 
+                reversed = False
+            print("Play is reversed!")
+
+        if pile[-1].num == 'skip':
+            current_player = get_next_player(current_player)   
+            print(f"Player {current_player} is skipped!")   
+
+        if pile[-1].num == 'd2':
+            current_player = get_next_player(current_player)
+            print(f"Player {current_player} is drawing 2")
+            draw_card(deck, players[current_player-1].hand)
+            draw_card(deck, players[current_player-1].hand)
+            print_hand(players[current_player-1])
+
+        if pile[-1].color == 'black':
+            new_color = players[current_player].get_most_color()[0]
+            pile[-1].color = new_color
+            print(f"The new color is: {new_color}!")
+
+            if pile[-1].num == 'd4':
+                current_player = get_next_player(current_player)
+                print(f"Player {current_player} is drawing 4")
+                draw_card(deck, players[current_player-1].hand)
+                draw_card(deck, players[current_player-1].hand)
+                draw_card(deck, players[current_player-1].hand)
+                draw_card(deck, players[current_player-1].hand)
+                print_hand(players[current_player-1])
+
         current_player = get_next_player(current_player)
-    
+        print("\n")
 
 
 run({1:0})
