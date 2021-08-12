@@ -7,32 +7,36 @@ player_num = 4
 starting_card_num = 7
 draw_1 = True
 reversed = False
+commentary =  False
 
 #Utilities
 def get_next_player(current_player):
+    global reversed
     if not reversed:
         if current_player == player_num:
             current_player = 1
         else:
             current_player += 1
-        return current_player
     else:
         if current_player == 1:
             current_player = player_num
         else:
             current_player -= 1
+    return current_player
 
 def print_deck(deck):
-    print("Deck:")
-    for card in deck:
-        print(card.name)
+    if commentary:
+        print("Deck:")
+        for card in deck:
+            print(card.name)
 
 def print_hand(player):
-    print(f"Player {player.num}'s hand:")
-    hand = []
-    for card in player.hand:
-        hand.append(card.name)
-    print(hand)
+    if commentary:
+        print(f"Player {player.num}'s hand:")
+        hand = []
+        for card in player.hand:
+            hand.append(card.name)
+        print(hand)
 
 #Core Classes
 class Card:
@@ -68,30 +72,34 @@ class Player:
                 if card.color == pile[-1].color or card.num == pile[-1].num or card.color == 'black':
                     pile.append(card)
                     self.hand.remove(card)
-                    print(f"Player {self.num} Playing Card: {card.name}")
+                    if commentary: print(f"Player {self.num} Playing Card: {card.name}")
                     return deck, pile
             if draw_1:
-                print(f"Player {self.num} drawing card")
+                if commentary: print(f"Player {self.num} drawing card")
                 deck, self.hand = draw_card(deck, self.hand)
                 card = self.hand[-1]
                 if card.color == pile[-1].color or card.num == pile[-1].num:
                     pile.append(card)
                     self.hand.remove(card)
-                    print(f"Player {self.num} Playing Card: {card.name}")
+                    if commentary: print(f"Player {self.num} Playing Card: {card.name}")
                 return deck, pile
             else:
-                print(f"Player {self.num} drawing cards")
+                if commentary: print(f"Player {self.num} drawing cards")
                 while self.hand[-1].color != pile[-1].color and self.hand[-1].num != pile[-1].num:
                     deck, self.hand = draw_card(deck, self.hand)
                 card = self.hand[-1]
                 pile.append(card)
                 self.hand.remove(card)
-                print(f"Player {self.num} Playing Card: {card.name}")
+                if commentary: print(f"Player {self.num} Playing Card: {card.name}")
                 return deck, pile
 
 #Main Functions
-def draw_card(deck, player_hand):
-    print(f"Drawing card: {deck[0].name}")
+def draw_card(deck, player_hand, *pile):
+    if len(deck) == 0:
+        if commentary: print("Reshuffling Pile into new Deck")
+        deck, pile = rebuild_deck(pile)
+        if commentary: print(f"Deck is now {deck} and pile is now {pile}")
+    if commentary: print(f"Drawing card: {deck[0].name}")
     player_hand.append(deck[0])
     deck.pop(0)
     return deck, player_hand
@@ -115,6 +123,13 @@ def build_deck():
                 deck.append(Card(color, bnumber))
         shuffle(deck)
     return deck
+
+def rebuild_deck(pile):
+    deck = copy.deepcopy(pile[:-1])
+    pile = [pile[-1]]
+    shuffle(deck)
+    print(f"Deck is {deck}")
+    return deck, pile
 
 #Build Players
 def build_players(deck, player_num, playstyles):
@@ -141,57 +156,66 @@ def run(playstyles):
     deck, pile = draw_card(deck, pile)
 
     #play game
-    print(f"First card on pile: {pile[-1].name}")
-    #while(1)
-    for times in range(15):    
+    if commentary: (f"First card on pile: {pile[-1].name}")
+    while(1):
+    #for times in range(50):    
         print_hand(players[current_player-1])
     
         deck, pile = players[current_player-1].play_card(deck, pile)
 
         print_hand(players[current_player-1])
 
-        print(f"Card on top of pile: {pile[-1].name}")
+        if commentary: print(f"Card on top of pile: {pile[-1].name}")
 
         if not players[current_player-1].hand:
-            return print(f"{current_player} wins!")
+            if commentary: print(f"Player {current_player} wins!")
+            return current_player
     
-        #Put in drawing conditions for when d2 and d4, choose color played and rev and skip stuff
+        #Special Cards
         if pile[-1].num == 'rev':
+            global reversed
             if not reversed: 
                 reversed = True
             else: 
                 reversed = False
-            print("Play is reversed!")
+            if commentary: print("Play is reversed!")
 
         if pile[-1].num == 'skip':
             current_player = get_next_player(current_player)   
-            print(f"Player {current_player} is skipped!")   
+            if commentary: print(f"Player {current_player} is skipped!")   
 
         if pile[-1].num == 'd2':
             current_player = get_next_player(current_player)
-            print(f"Player {current_player} is drawing 2")
-            draw_card(deck, players[current_player-1].hand)
-            draw_card(deck, players[current_player-1].hand)
+            if commentary: print(f"Player {current_player} is drawing 2")
+            draw_card(deck, players[current_player-1].hand, pile)
+            draw_card(deck, players[current_player-1].hand, pile)
             print_hand(players[current_player-1])
 
         if pile[-1].color == 'black':
-            new_color = players[current_player].get_most_color()[0]
+            new_color = players[current_player-1].get_most_color()[0]
             pile[-1].color = new_color
-            print(f"The new color is: {new_color}!")
+            if commentary: print(f"The new color is: {new_color}!")
 
             if pile[-1].num == 'd4':
                 current_player = get_next_player(current_player)
-                print(f"Player {current_player} is drawing 4")
-                draw_card(deck, players[current_player-1].hand)
-                draw_card(deck, players[current_player-1].hand)
-                draw_card(deck, players[current_player-1].hand)
-                draw_card(deck, players[current_player-1].hand)
+                if commentary: print(f"Player {current_player} is drawing 4")
+                draw_card(deck, players[current_player-1].hand, pile)
+                draw_card(deck, players[current_player-1].hand, pile)
+                draw_card(deck, players[current_player-1].hand, pile)
+                draw_card(deck, players[current_player-1].hand, pile)
                 print_hand(players[current_player-1])
 
         current_player = get_next_player(current_player)
-        print("\n")
+        #Reshuffle Pile is deck runs out
+        if len(deck) == 0:
+            if commentary: print("Reshuffling Pile into new Deck")
+            deck, pile = rebuild_deck(pile)
+            print(f"Deck is now {deck} and pile is now {pile}")
+        if commentary: print("\n")
 
 
-run({1:0})
+#run({1:0})
 
-print("uno.py finished")
+if commentary: print("uno.py finished")
+
+#Tuple Error
